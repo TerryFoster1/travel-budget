@@ -1,0 +1,20 @@
+{
+    "name":  "travel-budget-app",
+    "private":  true,
+    "version":  "0.1.0",
+    "description":  "Scaffold for the Travel Budget travel membership and opportunity platform.",
+    "workspaces":  [
+                       "client",
+                       "server"
+                   ],
+    "scripts":  {
+                    "dev":  "npm run dev --workspace client",
+                    "dev:client":  "npm run dev --workspace client",
+                    "dev:server":  "npm run dev --workspace server",
+                    "test":  "npm run test --workspace client \u0026\u0026 npm run test --workspace server",
+                    "build":  "npm run build --workspace client \u0026\u0026 npm run build --workspace server"
+                },
+    "devDependencies":  {
+                            "@playwright/test":  "latest"
+                        }
+}

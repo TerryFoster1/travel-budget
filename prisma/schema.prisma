@@ -1,0 +1,29 @@
+﻿// Prisma schema planning placeholder for PostgreSQL.
+// Final models are intentionally not defined yet.
+// Add real fields, relations, indexes, and constraints only after the database plan is approved.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Placeholder model plan:
+// - User: platform member identity and account ownership boundary.
+// - TravelProfile: household or traveler profile used for matching.
+// - TravelPreference: interests, travel style, dates, airports, and constraints.
+// - TravelBalance: purchasing power balance representation, not a bank account.
+// - ContributionPlan: recurring contribution intent and planning metadata.
+// - TravelOpportunity: future travel offer or opportunity record.
+// - TravelCategory: category taxonomy for opportunities.
+// - Destination: destination metadata for matching and browsing.
+// - Airport: departure and arrival airport metadata.
+// - Referral: member invitation and referral tracking.
+// - RewardTransaction: non-banking reward ledger placeholder.
+// - VacationAlert: user-configured opportunity alert intent.
+// - OpportunityMatch: computed relationship between profiles and opportunities.
+// - Notification: user-facing message and delivery tracking placeholder.
+// - AdminUser: internal administrative access boundary.
