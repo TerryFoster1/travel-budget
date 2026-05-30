@@ -74,32 +74,27 @@ p {
 }
 
 .app-shell {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
   min-height: 100vh;
   min-width: 0;
 }
 
-.app-shell > * {
-  min-width: 0;
-}
-
-.sidebar {
+.topbar {
   position: sticky;
   top: 0;
-  align-self: start;
-  display: flex;
-  flex-direction: column;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: 1rem;
-  height: 100vh;
-  padding: 1.25rem;
-  border-right: 1px solid var(--line);
-  background: rgba(255, 247, 231, 0.86);
-  backdrop-filter: blur(20px);
+  align-items: center;
+  padding: 0.8rem clamp(1rem, 3vw, 2rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.48);
+  background: rgba(255, 247, 231, 0.88);
+  backdrop-filter: blur(22px);
 }
 
 .brand,
 .nav-list button,
+.menu-button,
 .text-button {
   border: 0;
   background: transparent;
@@ -110,7 +105,7 @@ p {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  width: 100%;
+  width: max-content;
   padding: 0.5rem;
   text-align: left;
 }
@@ -138,17 +133,19 @@ p {
 }
 
 .nav-list {
-  display: grid;
+  display: flex;
   gap: 0.35rem;
-  margin-top: 0.5rem;
+  justify-content: center;
+  min-width: 0;
 }
 
 .nav-list button {
-  width: 100%;
+  width: auto;
   padding: 0.8rem 0.9rem;
-  border-radius: 8px;
-  text-align: left;
+  border-radius: 999px;
+  text-align: center;
   color: #3b4b47;
+  white-space: nowrap;
 }
 
 .nav-list button.active,
@@ -157,7 +154,6 @@ p {
   background: linear-gradient(135deg, rgba(0, 165, 140, 0.13), rgba(255, 173, 47, 0.16));
 }
 
-.sidebar-card,
 .panel,
 .metric-card,
 .travel-card,
@@ -171,20 +167,58 @@ p {
   box-shadow: 0 10px 34px rgba(37, 51, 48, 0.08);
 }
 
-.sidebar-card {
-  margin-top: auto;
-  padding: 1rem;
-}
-
-.sidebar-card strong {
-  display: block;
-  margin: 0.25rem 0;
-  font-size: 1.9rem;
-}
-
 main {
   min-width: 0;
-  padding: 1.25rem;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.balance-pill {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 152px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  color: white;
+  background: linear-gradient(135deg, var(--reef-dark), var(--reef));
+  box-shadow: 0 12px 28px rgba(7, 94, 104, 0.18);
+}
+
+.balance-pill span {
+  font-size: 0.7rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.balance-pill strong {
+  font-size: 1.05rem;
+}
+
+.menu-button {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  place-items: center;
+}
+
+.menu-button span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  margin: 3px auto;
+  border-radius: 999px;
+  background: var(--reef-dark);
+}
+
+.subtle-nav {
+  opacity: 0.62;
 }
 
 .page-grid,
@@ -1149,20 +1183,6 @@ code {
 }
 
 @media (max-width: 1100px) {
-  .app-shell {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sidebar {
-    position: static;
-    width: 100%;
-    max-width: 100vw;
-    min-width: 0;
-    height: auto;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
   .nav-list {
     display: flex;
     overflow-x: auto;
@@ -1172,8 +1192,16 @@ code {
     min-width: max-content;
   }
 
-  .sidebar-card {
+  .topbar {
+    grid-template-columns: auto auto 1fr;
+  }
+
+  .topbar-actions {
     display: none;
+  }
+
+  .balance-pill {
+    justify-self: end;
   }
 
   .choice-grid,
@@ -1202,23 +1230,57 @@ code {
 
 @media (max-width: 720px) {
   main,
-  .sidebar {
+  .topbar {
     padding: 0.85rem;
+  }
+
+  .topbar {
+    grid-template-columns: auto auto auto;
+  }
+
+  .menu-button {
+    display: block;
+  }
+
+  .nav-list {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0.85rem;
+    right: 0.85rem;
+    display: none;
+    flex-direction: column;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255, 247, 231, 0.98);
+    box-shadow: var(--shadow);
+  }
+
+  .nav-list.open {
+    display: flex;
+  }
+
+  .nav-list button {
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+  }
+
+  .balance-pill {
+    min-width: 0;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .balance-pill span {
+    display: none;
   }
 
   .hero-panel,
   .page-header {
     grid-template-columns: 1fr;
     min-height: auto;
-  }
-
-  .nav-list {
-    display: flex;
-    overflow-x: auto;
-  }
-
-  .nav-list button {
-    min-width: max-content;
   }
 
   .stepper {

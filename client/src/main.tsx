@@ -414,6 +414,7 @@ function rankOpportunity(opportunity: Opportunity, profile: Profile, balance: nu
 
 function App() {
   const [view, setView] = useState<View>("home");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [state, setState] = useState<AppState>(loadState);
 
   useEffect(() => {
@@ -515,36 +516,48 @@ function App() {
     setState((current) => ({ ...current, opportunities: current.opportunities.filter((item) => item.id !== id) }));
   }
 
+  function goTo(nextView: View) {
+    setView(nextView);
+    setMenuOpen(false);
+  }
+
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <button className="brand" onClick={() => setView("home")}>
+      <header className="topbar">
+        <button className="brand" onClick={() => goTo("home")}>
           <span className="brand-mark">TB</span>
           <span>
             <strong>Travel Budget</strong>
             <small>TravelBudget.ca</small>
           </span>
         </button>
-        <nav className="nav-list" aria-label="Primary navigation">
+        <button className="menu-button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="primary-navigation">
+          <span />
+          <span />
+          <span />
+        </button>
+        <nav id="primary-navigation" className={menuOpen ? "nav-list open" : "nav-list"} aria-label="Primary navigation">
           {navItems.map((item) => (
-            <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => setView(item.id)}>
+            <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => goTo(item.id)}>
               {item.label}
             </button>
           ))}
+          <button className={view === "admin" ? "active subtle-nav" : "subtle-nav"} onClick={() => goTo("admin")}>Demo Admin</button>
         </nav>
-        <button className="secondary compact-button" onClick={() => setView("onboarding")}>Update onboarding</button>
-        <button className="ghost-button" onClick={resetDemo}>Reset demo data</button>
-        <div className="sidebar-card">
-          <span className="eyebrow">Travel Balance</span>
-          <strong>{money(state.balance)}</strong>
-          <small>Spendable travel purchasing power inside Travel Budget.</small>
+        <div className="topbar-actions">
+          <button className="secondary compact-button" onClick={() => goTo("onboarding")}>Update preferences</button>
+          <button className="ghost-button" onClick={resetDemo}>Reset demo</button>
         </div>
-      </aside>
+        <div className="balance-pill">
+          <span>Travel Balance</span>
+          <strong>{money(state.balance)}</strong>
+        </div>
+      </header>
 
       <main>
-        {view === "home" && <Home setView={setView} balance={state.balance} affordableCount={affordableTrips.length} />}
-        {view === "onboarding" && <Onboarding state={state} patch={patch} profile={activeProfile} patchProfile={(profile) => addProfile({ ...profile, id: makeId() })} onDone={() => setView("dashboard")} />}
-        {view === "dashboard" && <Dashboard state={state} profile={activeProfile} rankedTrips={rankedTrips} affordableTrips={affordableTrips} almostTrips={almostTrips} goal={selectedGoal} setView={setView} />}
+        {view === "home" && <Home setView={goTo} balance={state.balance} affordableCount={affordableTrips.length} />}
+        {view === "onboarding" && <Onboarding state={state} patch={patch} profile={activeProfile} patchProfile={(profile) => addProfile({ ...profile, id: makeId() })} onDone={() => goTo("dashboard")} />}
+        {view === "dashboard" && <Dashboard state={state} profile={activeProfile} rankedTrips={rankedTrips} affordableTrips={affordableTrips} almostTrips={almostTrips} goal={selectedGoal} setView={goTo} />}
         {view === "profiles" && <Profiles profiles={state.profiles} activeId={state.activeProfileId} setActive={(id) => patch({ activeProfileId: id })} addProfile={addProfile} />}
         {view === "balance" && <BalanceSimulator state={state} patch={patch} addContribution={(amount) => addLedger("One-time contribution added to Travel Balance", amount, "contribution")} />}
         {view === "opportunities" && (
@@ -558,7 +571,7 @@ function App() {
             onReferral={simulateReferral}
           />
         )}
-        {view === "alerts" && <Alerts rankedTrips={rankedTrips} setView={setView} />}
+        {view === "alerts" && <Alerts rankedTrips={rankedTrips} setView={goTo} />}
         {view === "goals" && <Goals goals={state.goals} balance={state.balance} addGoal={addGoal} addGift={addGift} />}
         {view === "sharing" && <Sharing opportunities={state.opportunities} sharedTripIds={state.sharedTripIds} onReferral={simulateReferral} />}
         {view === "admin" && <Admin opportunities={state.opportunities} upsert={upsertOpportunity} remove={deleteOpportunity} />}
@@ -717,9 +730,11 @@ function Dashboard({ state, profile, rankedTrips, affordableTrips, almostTrips, 
       <div className="content-grid two-one">
         <div className="panel">
           <PanelHead eyebrow="You Can Afford This" title="Ready when you are" action="Explore all" onClick={() => setView("opportunities")} />
-          <div className="opportunity-row">
-            {(affordableTrips.length ? affordableTrips : rankedTrips).slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}
-          </div>
+          {affordableTrips.length ? (
+            <div className="opportunity-row">
+              {affordableTrips.slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}
+            </div>
+          ) : <EmptyState title="No trips are ready yet" text="Add to Travel Balance and this section becomes the emotional payoff: trips you can use Travel Balance for today." action="Add to Travel Balance" onClick={() => setView("balance")} />}
         </div>
         <div className="panel">
           <PanelHead eyebrow="Travel profile" title={profile.name} action="Edit profiles" onClick={() => setView("profiles")} />
@@ -730,9 +745,11 @@ function Dashboard({ state, profile, rankedTrips, affordableTrips, almostTrips, 
       <div className="content-grid two-one">
         <div className="panel">
           <PanelHead eyebrow="Almost There" title="Trips within reach" action="Add to Travel Balance" onClick={() => setView("balance")} />
-          <div className="opportunity-row">
-            {(almostTrips.length ? almostTrips : rankedTrips.slice(1, 4)).slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}
-          </div>
+          {almostTrips.length ? (
+            <div className="opportunity-row">
+              {almostTrips.slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}
+            </div>
+          ) : <p className="muted">No trips are within $500 right now. Keep building toward the dream trips below.</p>}
         </div>
         <div className="panel">
           <PanelHead eyebrow="Keep Building Toward" title="Dream trips on deck" action="Vacation Alerts" onClick={() => setView("alerts")} />
@@ -785,7 +802,7 @@ function BalanceSimulator({ state, patch, addContribution }: { state: AppState; 
   const projection = [3, 6, 12, 18].map((month) => ({ month, value: state.balance + monthlyEquivalent * month }));
   return (
     <section className="page-grid">
-      <SectionTitle eyebrow="Travel Balance simulator" title="Make progress feel visible." text="This is local demo activity only: no payments, no banking, no external integrations." />
+      <SectionTitle eyebrow="Travel Balance simulator" title="Make progress feel visible." text="This is local demo activity only: no payments and no real-world integrations." />
       <div className="stats-grid">
         <div className="balance-card"><span className="eyebrow">Current Travel Balance</span><strong>{money(state.balance)}</strong><small>Available for eligible trips.</small></div>
         <Metric label="Recurring amount" value={`${money(state.recurringAmount)} ${state.frequency}`} detail="Demo projection" />
