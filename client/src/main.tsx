@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./styles.css";
 
-type View = "onboarding" | "dashboard" | "profiles" | "balance" | "opportunities" | "goals" | "sharing" | "admin";
+type View = "home" | "onboarding" | "dashboard" | "profiles" | "balance" | "opportunities" | "alerts" | "goals" | "sharing" | "admin";
 type Mode = "goal" | "contribution";
 type Frequency = "weekly" | "monthly";
 type MatchStatus = "afford" | "almost" | "building";
@@ -105,10 +105,12 @@ const tripLengths = ["Weekend", "3-5 days", "1 week", "2 weeks", "Flexible"];
 const airports = ["YYZ", "YTZ", "YUL", "YVR", "BUF", "Flexible"];
 
 const navItems: Array<{ id: View; label: string }> = [
+  { id: "home", label: "Home" },
   { id: "dashboard", label: "Dashboard" },
   { id: "profiles", label: "Profiles" },
   { id: "balance", label: "Balance" },
   { id: "opportunities", label: "Trips" },
+  { id: "alerts", label: "Alerts" },
   { id: "goals", label: "Goals" },
   { id: "sharing", label: "Sharing" },
   { id: "admin", label: "Admin" },
@@ -375,7 +377,7 @@ function rankOpportunity(opportunity: Opportunity, profile: Profile, balance: nu
 }
 
 function App() {
-  const [view, setView] = useState<View>("dashboard");
+  const [view, setView] = useState<View>("home");
   const [state, setState] = useState<AppState>(loadState);
 
   useEffect(() => {
@@ -480,7 +482,7 @@ function App() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <button className="brand" onClick={() => setView("dashboard")}>
+        <button className="brand" onClick={() => setView("home")}>
           <span className="brand-mark">TB</span>
           <span>
             <strong>Travel Budget</strong>
@@ -504,10 +506,11 @@ function App() {
       </aside>
 
       <main>
+        {view === "home" && <Home setView={setView} balance={state.balance} affordableCount={affordableTrips.length} />}
         {view === "onboarding" && <Onboarding state={state} patch={patch} profile={activeProfile} patchProfile={(profile) => addProfile({ ...profile, id: makeId() })} onDone={() => setView("dashboard")} />}
         {view === "dashboard" && <Dashboard state={state} profile={activeProfile} rankedTrips={rankedTrips} affordableTrips={affordableTrips} almostTrips={almostTrips} goal={selectedGoal} setView={setView} />}
         {view === "profiles" && <Profiles profiles={state.profiles} activeId={state.activeProfileId} setActive={(id) => patch({ activeProfileId: id })} addProfile={addProfile} />}
-        {view === "balance" && <BalanceSimulator state={state} patch={patch} addContribution={(amount) => addLedger("Manual contribution added to Travel Balance", amount, "contribution")} />}
+        {view === "balance" && <BalanceSimulator state={state} patch={patch} addContribution={(amount) => addLedger("One-time contribution added to Travel Balance", amount, "contribution")} />}
         {view === "opportunities" && (
           <Opportunities
             rankedTrips={rankedTrips}
@@ -519,6 +522,7 @@ function App() {
             onReferral={simulateReferral}
           />
         )}
+        {view === "alerts" && <Alerts rankedTrips={rankedTrips} setView={setView} />}
         {view === "goals" && <Goals goals={state.goals} balance={state.balance} addGoal={addGoal} addGift={addGift} />}
         {view === "sharing" && <Sharing opportunities={state.opportunities} sharedTripIds={state.sharedTripIds} onReferral={simulateReferral} />}
         {view === "admin" && <Admin opportunities={state.opportunities} upsert={upsertOpportunity} remove={deleteOpportunity} />}
@@ -537,7 +541,7 @@ function Onboarding({ state, patch, profile, patchProfile, onDone }: { state: Ap
       <Hero eyebrow="Travel membership setup" title="Build travel purchasing power around the trips you actually want." text="Choose a goal date or let your Travel Balance grow until the opportunity engine finds the right trip." />
       <div className="content-grid two-one">
         <div className="panel">
-          <h2>Choose your funding style</h2>
+          <h2>Choose how your Travel Balance grows</h2>
           <div className="toggle-row">
             <button className={state.mode === "goal" ? "selected" : ""} onClick={() => patch({ mode: "goal" })}>Goal mode</button>
             <button className={state.mode === "contribution" ? "selected" : ""} onClick={() => patch({ mode: "contribution" })}>Contribution mode</button>
@@ -549,7 +553,7 @@ function Onboarding({ state, patch, profile, patchProfile, onDone }: { state: Ap
                 <label>Desired travel date<input type="month" value={state.desiredTravelDate} onChange={(event) => patch({ desiredTravelDate: event.target.value })} /></label>
               </>
             )}
-            <label>Contribution amount<input type="number" value={state.recurringAmount} onChange={(event) => patch({ recurringAmount: Number(event.target.value) })} /></label>
+            <label>Planned contribution amount<input type="number" value={state.recurringAmount} onChange={(event) => patch({ recurringAmount: Number(event.target.value) })} /></label>
             <label>Frequency<select value={state.frequency} onChange={(event) => patch({ frequency: event.target.value as Frequency })}><option>weekly</option><option>monthly</option></select></label>
           </div>
         </div>
@@ -560,6 +564,50 @@ function Onboarding({ state, patch, profile, patchProfile, onDone }: { state: Ap
         </div>
       </div>
       <ProfileForm title="Create your first travel profile" draft={draft} setDraft={setDraft} submitLabel="Save profile and continue" onSubmit={() => { patchProfile(draft); onDone(); }} />
+    </section>
+  );
+}
+
+function Home({ setView, balance, affordableCount }: { setView: (view: View) => void; balance: number; affordableCount: number }) {
+  return (
+    <section className="page-grid">
+      <header className="page-header scenic-sky home-hero">
+        <div>
+          <span className="eyebrow">Travel membership platform</span>
+          <h1>Pay for your next vacation one paycheck at a time.</h1>
+          <p>
+            Travel Budget helps families build a Travel Balance and discover real-feeling trip opportunities when that balance is ready.
+            It is not a bank and not a travel agency checkout. It is a membership-style way to turn future vacations into visible progress.
+          </p>
+          <div className="hero-actions">
+            <button className="primary light" onClick={() => setView("onboarding")}>Start travel setup</button>
+            <button className="secondary translucent" onClick={() => setView("opportunities")}>Preview trip matches</button>
+          </div>
+        </div>
+        <div className="boarding-pass">
+          <span>Your Travel Balance</span>
+          <strong>{money(balance)}</strong>
+          <small>{affordableCount} trips currently say You Can Afford This.</small>
+        </div>
+      </header>
+
+      <div className="value-grid">
+        <div className="panel">
+          <span className="eyebrow">1. Choose your travel style</span>
+          <h2>Family resort, cruise, Disney, Europe, or flexible adventures.</h2>
+          <p>Profiles tell the opportunity engine who is traveling, when, from where, and what to avoid.</p>
+        </div>
+        <div className="panel">
+          <span className="eyebrow">2. Build Travel Balance</span>
+          <h2>Regular contributions become travel purchasing power.</h2>
+          <p>The dollar amount is shown clearly, but the experience stays focused on future trips, not financial management.</p>
+        </div>
+        <div className="panel">
+          <span className="eyebrow">3. Unlock opportunity matches</span>
+          <h2>You Can Afford This becomes the moment of excitement.</h2>
+          <p>Trips are ranked by preferences, airport, timing, party size, rating, exclusions, and Travel Balance.</p>
+        </div>
+      </div>
     </section>
   );
 }
@@ -610,12 +658,12 @@ function Dashboard({ state, profile, rankedTrips, affordableTrips, almostTrips, 
 
       <div className="content-grid two-one">
         <div className="panel">
-          <PanelHead eyebrow="Travel Balance activity" title="Recent movement" action="Open simulator" onClick={() => setView("balance")} />
+          <PanelHead eyebrow="Travel Balance activity" title="Recent progress" action="Open simulator" onClick={() => setView("balance")} />
           <Ledger items={state.ledger.slice(0, 5)} />
         </div>
         <div className="panel">
           <PanelHead eyebrow="Travel goal" title={goal?.name ?? "Create a goal"} action="Goals" onClick={() => setView("goals")} />
-          {goal ? <><Progress value={percent(goal.currentAmount, goal.targetAmount)} /><p>{money(goal.currentAmount)} of {money(goal.targetAmount)} ready.</p></> : <p>Create a public-style travel goal for friends and family.</p>}
+          {goal ? <><Progress value={percent(goal.currentAmount, goal.targetAmount)} /><p>{money(goal.currentAmount)} of {money(goal.targetAmount)} ready.</p></> : <p>Create a shareable Travel Goal so friends and family can cheer the trip forward.</p>}
         </div>
       </div>
     </section>
@@ -653,7 +701,7 @@ function BalanceSimulator({ state, patch, addContribution }: { state: AppState; 
         <div className="balance-card"><span className="eyebrow">Current Travel Balance</span><strong>{money(state.balance)}</strong><small>Available for eligible trips.</small></div>
         <Metric label="Recurring amount" value={`${money(state.recurringAmount)} ${state.frequency}`} detail="Demo projection" />
         <Metric label="12 month projection" value={money(projection[2].value)} detail="If rhythm continues" />
-        <Metric label="Activity entries" value={String(state.ledger.length)} detail="Local ledger" />
+        <Metric label="Progress moments" value={String(state.ledger.length)} detail="Travel Balance activity" />
       </div>
       <div className="content-grid two-one">
         <div className="panel">
@@ -661,7 +709,7 @@ function BalanceSimulator({ state, patch, addContribution }: { state: AppState; 
           <div className="form-grid">
             <label>Recurring amount<input type="number" value={state.recurringAmount} onChange={(event) => patch({ recurringAmount: Number(event.target.value) })} /></label>
             <label>Frequency<select value={state.frequency} onChange={(event) => patch({ frequency: event.target.value as Frequency })}><option>weekly</option><option>monthly</option></select></label>
-            <label>Manual amount<input type="number" value={manualAmount} onChange={(event) => setManualAmount(Number(event.target.value))} /></label>
+            <label>One-time contribution<input type="number" value={manualAmount} onChange={(event) => setManualAmount(Number(event.target.value))} /></label>
             <button className="primary form-button" onClick={() => addContribution(manualAmount)}>Add to Travel Balance</button>
           </div>
           <div className="projection-grid">
@@ -669,7 +717,7 @@ function BalanceSimulator({ state, patch, addContribution }: { state: AppState; 
           </div>
         </div>
         <div className="panel">
-          <PanelHead eyebrow="Recent activity" title="Travel Balance ledger" />
+          <PanelHead eyebrow="Recent activity" title="Travel Balance progress" />
           <Ledger items={state.ledger} />
         </div>
       </div>
@@ -680,7 +728,13 @@ function BalanceSimulator({ state, patch, addContribution }: { state: AppState; 
 function Opportunities({ rankedTrips, savedTripIds, sharedTripIds, onSave, onShare, onBook, onReferral }: { rankedTrips: RankedOpportunity[]; savedTripIds: string[]; sharedTripIds: string[]; onSave: (id: string) => void; onShare: (id: string) => void; onBook: (opportunity: Opportunity) => void; onReferral: (opportunity: Opportunity) => void }) {
   return (
     <section className="page-grid">
-      <SectionTitle eyebrow="Opportunity engine" title="Matched trips unlock as your Travel Balance grows." text="Mock opportunities are ranked by interests, dates, party size, airport, provider exclusions, rating, last-minute preference, and Travel Balance." />
+      <SectionTitle eyebrow="Opportunity matches" title="Trips unlock as your Travel Balance grows." text="Opportunities are ranked by interests, dates, party size, airport, provider exclusions, rating, last-minute preference, and Travel Balance." />
+      {rankedTrips.length === 0 && (
+        <EmptyState
+          title="No opportunity matches yet"
+          text="Try lowering the minimum rating, enabling last-minute Vacation Alerts, or widening the travel window on your active profile."
+        />
+      )}
       <div className="opportunity-grid">
         {rankedTrips.map((trip) => (
           <TripCard
@@ -699,6 +753,32 @@ function Opportunities({ rankedTrips, savedTripIds, sharedTripIds, onSave, onSha
   );
 }
 
+function Alerts({ rankedTrips, setView }: { rankedTrips: RankedOpportunity[]; setView: (view: View) => void }) {
+  const alerts = rankedTrips.filter((trip) => trip.status === "afford" || trip.status === "almost").slice(0, 5);
+  return (
+    <section className="page-grid">
+      <SectionTitle eyebrow="Vacation Alerts" title="See what your Travel Balance is close to unlocking." text="Alerts focus attention on trips that are ready now or close enough to feel motivating." />
+      {alerts.length === 0 ? (
+        <EmptyState title="No Vacation Alerts yet" text="Add to Travel Balance or broaden your travel profile to surface near-ready trips." action="Open Travel Balance" onClick={() => setView("balance")} />
+      ) : (
+        <div className="alert-stack">
+          {alerts.map((trip) => (
+            <article className="alert-card" key={trip.opportunity.id}>
+              <div>
+                <span className={`status-pill ${trip.status}`}>{trip.status === "afford" ? "You Can Afford This" : "Almost There"}</span>
+                <h2>{trip.opportunity.title}</h2>
+                <p>{trip.opportunity.destination} from {trip.opportunity.departureAirport}. {trip.opportunity.remainingInventory} spots remain. Expires in {daysUntil(trip.opportunity.expiryDate)} days.</p>
+                <p className="match-reason">Why this appears: {trip.reasons.join(", ")}.</p>
+              </div>
+              <strong>{money(trip.opportunity.estimatedTotalCost)}</strong>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function Goals({ goals, balance, addGoal, addGift }: { goals: Goal[]; balance: number; addGoal: (goal: Goal) => void; addGift: (goalId: string, name: string, amount: number) => void }) {
   const [name, setName] = useState("Disney Celebration Trip");
   const [targetAmount, setTargetAmount] = useState(5000);
@@ -706,7 +786,7 @@ function Goals({ goals, balance, addGoal, addGift }: { goals: Goal[]; balance: n
   const [giftAmount, setGiftAmount] = useState(50);
   return (
     <section className="page-grid">
-      <SectionTitle eyebrow="Travel goals" title="Create public-style goals friends can rally around." text="Gift contributions are simulated locally and added to Travel Balance and contribution history." />
+      <SectionTitle eyebrow="Travel goals" title="Create a shareable trip goal friends can rally around." text="Gift contributions are demo-only here, but the product idea is simple: family and friends can help add to Travel Balance for a specific future vacation." />
       <div className="inline-form panel">
         <label>Goal name<input value={name} onChange={(event) => setName(event.target.value)} /></label>
         <label>Target amount<input type="number" value={targetAmount} onChange={(event) => setTargetAmount(Number(event.target.value))} /></label>
@@ -715,13 +795,13 @@ function Goals({ goals, balance, addGoal, addGift }: { goals: Goal[]; balance: n
       <div className="goals-grid">
         {goals.map((goal) => (
           <article className="goal-card" key={goal.id}>
-            <PanelHead eyebrow="Public-style goal" title={goal.name} />
+            <PanelHead eyebrow="Shareable Travel Goal" title={goal.name} />
             <Progress value={percent(goal.currentAmount, goal.targetAmount)} />
             <div className="goal-meta"><span>{money(goal.currentAmount)} ready</span><span>{money(goal.targetAmount)} target</span><span>{goal.targetDate}</span></div>
             <div className="contribution-box">
               <div className="qr-placeholder">QR</div>
               <div>
-                <strong>Mock share link</strong>
+                <strong>Share link preview</strong>
                 <p>travelbudget.ca/goals/{goal.shareSlug}</p>
               </div>
             </div>
@@ -742,14 +822,15 @@ function Sharing({ opportunities, sharedTripIds, onReferral }: { opportunities: 
   const shared = opportunities.filter((item) => sharedTripIds.includes(item.id));
   return (
     <section className="page-grid">
-      <SectionTitle eyebrow="Referral prototype" title="Every opportunity can become a shareable travel moment." text="Referral links are mock links. Simulating a friend booking adds a $10 Travel Reward to Travel Balance." />
+      <SectionTitle eyebrow="Referral rewards" title="Every opportunity can become a shareable travel moment." text="Referral links are previews. When a friend books in this demo, a $10 Travel Reward is added to Travel Balance." />
+      {shared.length === 0 && <EmptyState title="No shared trips yet" text="Share an opportunity from the Trips page to see it here. For now, a few sample referral previews are shown below." />}
       <div className="card-grid">
         {(shared.length ? shared : opportunities.slice(0, 4)).map((opportunity) => (
           <article className="travel-card" key={opportunity.id}>
             <span className="eyebrow">{opportunity.category}</span>
             <h2>{opportunity.title}</h2>
             <p>travelbudget.ca/r/{opportunity.id}</p>
-            <button className="primary full-width" onClick={() => onReferral(opportunity)}>Simulate friend booking</button>
+            <button className="primary full-width" onClick={() => onReferral(opportunity)}>Friend booked this trip</button>
           </article>
         ))}
       </div>
@@ -758,10 +839,10 @@ function Sharing({ opportunities, sharedTripIds, onReferral }: { opportunities: 
 }
 
 function Admin({ opportunities, upsert, remove }: { opportunities: Opportunity[]; upsert: (opportunity: Opportunity) => void; remove: (id: string) => void }) {
-  const [draft, setDraft] = useState<Opportunity>({ ...defaultOpportunities[0], id: makeId(), title: "New Travel Budget Deal", provider: "Mock Provider" });
+  const [draft, setDraft] = useState<Opportunity>({ ...defaultOpportunities[0], id: makeId(), title: "New Travel Budget Deal", provider: "Demo Provider" });
   return (
     <section className="page-grid">
-      <SectionTitle eyebrow="Admin mock panel" title="Manage mock travel opportunities." text="This panel edits local state only. There is no database, travel API, booking system, or provider integration." />
+      <SectionTitle eyebrow="Admin demo panel" title="Manage demo travel opportunities." text="This panel edits local state only. There is no database, travel API, booking system, or provider integration." />
       <div className="panel">
         <div className="form-grid admin-form">
           <label>Title<input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
@@ -778,7 +859,7 @@ function Admin({ opportunities, upsert, remove }: { opportunities: Opportunity[]
           <label>Party capacity<input type="number" value={draft.partyCapacity} onChange={(event) => setDraft({ ...draft, partyCapacity: Number(event.target.value) })} /></label>
           <label className="check-row"><input type="checkbox" checked={draft.isLastMinute} onChange={(event) => setDraft({ ...draft, isLastMinute: event.target.checked })} /> Last-minute deal</label>
         </div>
-        <button className="primary" onClick={() => { upsert(draft); setDraft({ ...draft, id: makeId(), title: "New Travel Budget Deal" }); }}>Save mock opportunity</button>
+        <button className="primary" onClick={() => { upsert(draft); setDraft({ ...draft, id: makeId(), title: "New Travel Budget Deal" }); }}>Save demo opportunity</button>
       </div>
       <div className="card-grid">
         {opportunities.map((opportunity) => (
@@ -855,7 +936,7 @@ function TripCard({ trip, compact = false, saved, shared, onSave, onShare, onBoo
             <div className="button-row">
               <button className="secondary" onClick={onSave}>{saved ? "Saved" : "Save trip"}</button>
               <button className="secondary" onClick={onShare}>{shared ? "Shared" : "Share trip"}</button>
-              <button className="secondary" onClick={onReferral}>Simulate friend booking</button>
+              <button className="secondary" onClick={onReferral}>Friend booked this trip</button>
               <button className="primary" disabled={trip.status !== "afford"} onClick={onBook}>Use Travel Balance</button>
             </div>
           </>
@@ -906,6 +987,16 @@ function Progress({ value }: { value: number }) {
 
 function InfoList({ items }: { items: Array<[string, string]> }) {
   return <dl className="details-grid">{items.map(([term, detail]) => <div key={term}><dt>{term}</dt><dd>{detail}</dd></div>)}</dl>;
+}
+
+function EmptyState({ title, text, action, onClick }: { title: string; text: string; action?: string; onClick?: () => void }) {
+  return (
+    <div className="empty-state">
+      <strong>{title}</strong>
+      <p>{text}</p>
+      {action && <button className="secondary" onClick={onClick}>{action}</button>}
+    </div>
+  );
 }
 
 function Ledger({ items }: { items: Array<{ id: string; date: string; label: string; amount: number; type?: string }> }) {
