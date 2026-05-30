@@ -34,7 +34,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -397,7 +398,8 @@ label {
   font-weight: 800;
 }
 
-input {
+input,
+select {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--line);
@@ -405,6 +407,14 @@ input {
   padding: 0.7rem 0.8rem;
   background: white;
   color: var(--ink);
+}
+
+select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--reef) 50%), linear-gradient(135deg, var(--reef) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 19px, calc(100% - 13px) 19px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
 }
 
 .summary-grid,
@@ -425,6 +435,7 @@ input {
   display: block;
   font-size: 1.55rem;
   line-height: 1.05;
+  overflow-wrap: anywhere;
 }
 
 .balance-card {
@@ -446,6 +457,7 @@ input {
   margin: 0.35rem 0;
   font-size: clamp(2.8rem, 7vw, 5.2rem);
   line-height: 0.92;
+  overflow-wrap: anywhere;
 }
 
 .balance-card input {
@@ -605,6 +617,180 @@ code {
 
 .full-width {
   width: 100%;
+}
+
+.compact-button,
+.ghost-button {
+  width: 100%;
+}
+
+.ghost-button {
+  min-height: 40px;
+  border: 1px dashed rgba(109, 75, 118, 0.34);
+  border-radius: 8px;
+  color: var(--plum);
+  background: rgba(109, 75, 118, 0.06);
+  font-weight: 850;
+}
+
+.danger {
+  min-height: 42px;
+  border: 1px solid rgba(223, 107, 87, 0.35);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #8f2f24;
+  background: rgba(223, 107, 87, 0.12);
+  font-weight: 850;
+}
+
+.celebration {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 8px;
+  color: var(--reef-dark);
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(242, 165, 65, 0.16));
+}
+
+.celebration span {
+  color: #42615b;
+}
+
+.accent-panel {
+  display: grid;
+  align-content: center;
+  min-height: 220px;
+  color: white;
+  background:
+    linear-gradient(135deg, rgba(12, 79, 76, 0.92), rgba(109, 75, 118, 0.78)),
+    linear-gradient(135deg, var(--reef), var(--sun));
+}
+
+.accent-panel .eyebrow,
+.accent-panel p {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.accent-panel strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: clamp(2.4rem, 7vw, 4.6rem);
+  line-height: 0.95;
+}
+
+.form-button {
+  align-self: end;
+}
+
+.projection-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.field-label {
+  display: block;
+  margin: 1rem 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.chip-grid,
+.included-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chip,
+.included-list span {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  color: var(--reef-dark);
+  background: rgba(255, 255, 255, 0.74);
+  font-weight: 800;
+  font-size: 0.84rem;
+}
+
+.chip.selected {
+  border-color: rgba(15, 118, 110, 0.48);
+  color: white;
+  background: var(--reef);
+}
+
+.chip.excluded {
+  border-color: rgba(223, 107, 87, 0.42);
+  color: #8f2f24;
+  background: rgba(223, 107, 87, 0.12);
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 44px;
+}
+
+.check-row input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--reef);
+}
+
+.wide-field,
+.admin-form .check-row {
+  grid-column: 1 / -1;
+}
+
+.selected-card {
+  border-color: rgba(15, 118, 110, 0.45);
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.09), rgba(255, 255, 255, 0.92));
+}
+
+.match-reason {
+  margin: 1rem 0 0;
+  color: var(--plum);
+  font-weight: 800;
+}
+
+.afford-badge.almost {
+  color: #5d3a02;
+  background: #ffe2a8;
+}
+
+.afford-badge.building {
+  color: var(--plum);
+  background: #f2e8f5;
+}
+
+.inline-mini {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px auto;
+  gap: 0.65rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.negative {
+  color: #9b382b !important;
+}
+
+.included-list {
+  margin-top: 1rem;
 }
 
 .opportunity-grid {
