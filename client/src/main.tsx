@@ -27,6 +27,7 @@ type Opportunity = {
   id: string;
   title: string;
   destination: string;
+  description: string;
   provider: string;
   category: string;
   price: number;
@@ -104,15 +105,36 @@ const windows = ["Flexible", "Spring Break", "Summer", "Winter", "This Month", "
 const tripLengths = ["Weekend", "3-5 days", "1 week", "2 weeks", "Flexible"];
 const airports = ["YYZ", "YTZ", "YUL", "YVR", "BUF", "Flexible"];
 
+const travelImages = {
+  tropicalResort: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80",
+  cruise: "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1400&q=80",
+  themePark: "https://images.unsplash.com/photo-1563911302283-d2bc129e7570?auto=format&fit=crop&w=1400&q=80",
+  japan: "https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1400&q=80",
+  mediterranean: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1400&q=80",
+  family: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80",
+  couples: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=80",
+  weekend: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1400&q=80",
+  adventure: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1400&q=80",
+} as const;
+
+const imageForTone: Record<string, string> = {
+  mexico: travelImages.tropicalResort,
+  caribbean: travelImages.cruise,
+  disney: travelImages.themePark,
+  universal: travelImages.themePark,
+  med: travelImages.mediterranean,
+  japan: travelImages.japan,
+};
+
 const navItems: Array<{ id: View; label: string }> = [
   { id: "home", label: "Home" },
   { id: "dashboard", label: "Dashboard" },
   { id: "profiles", label: "Profiles" },
-  { id: "balance", label: "Balance" },
-  { id: "opportunities", label: "Trips" },
+  { id: "balance", label: "Travel Balance" },
+  { id: "opportunities", label: "Explore Trips" },
   { id: "alerts", label: "Alerts" },
-  { id: "goals", label: "Goals" },
-  { id: "sharing", label: "Sharing" },
+  { id: "goals", label: "Travel Goals" },
+  { id: "sharing", label: "Rewards & Sharing" },
   { id: "admin", label: "Admin" },
 ];
 
@@ -139,6 +161,7 @@ const defaultOpportunities: Opportunity[] = [
     id: "trip-mexico-family",
     title: "Riviera Maya Family Resort Week",
     destination: "Riviera Maya, Mexico",
+    description: "A warm all-inclusive week for families who want the vacation to feel easy from the airport onward.",
     provider: "Air Canada Vacations",
     category: "All-inclusive resort",
     price: 1899,
@@ -159,6 +182,7 @@ const defaultOpportunities: Opportunity[] = [
     id: "trip-caribbean-cruise",
     title: "7-Day Caribbean Cruise",
     destination: "Eastern Caribbean",
+    description: "A sun-soaked sailing with dining, entertainment, and island stops bundled into one simple escape.",
     provider: "Royal Caribbean",
     category: "Cruise",
     price: 1240,
@@ -179,6 +203,7 @@ const defaultOpportunities: Opportunity[] = [
     id: "trip-disney-2028",
     title: "Disney Vacation Preview",
     destination: "Orlando, Florida",
+    description: "A family theme-park adventure built around the moment the kids find out the trip is real.",
     provider: "Disney Travel",
     category: "Disney",
     price: 4200,
@@ -199,6 +224,7 @@ const defaultOpportunities: Opportunity[] = [
     id: "trip-universal",
     title: "Universal Studios Escape",
     destination: "Orlando, Florida",
+    description: "A high-energy theme-park getaway for families ready for rides, pools, and a big reveal.",
     provider: "Universal Parks",
     category: "Theme parks",
     price: 2450,
@@ -219,6 +245,7 @@ const defaultOpportunities: Opportunity[] = [
     id: "trip-mediterranean",
     title: "Mediterranean Cruise Window",
     destination: "Barcelona to Rome",
+    description: "A polished Europe-by-sea itinerary with coastal views, onboard dining, and city-to-city discovery.",
     provider: "Celebrity Cruises",
     category: "Cruise",
     price: 3800,
@@ -239,6 +266,7 @@ const defaultOpportunities: Opportunity[] = [
     id: "trip-japan",
     title: "Japan Adventure Path",
     destination: "Tokyo and Kyoto",
+    description: "A dream-trip path through neon nights, temples, rail days, and once-in-a-lifetime family memories.",
     provider: "Trafalgar",
     category: "Adventure",
     price: 6100,
@@ -294,7 +322,15 @@ const initialState: AppState = {
 function loadState() {
   try {
     const saved = localStorage.getItem(storageKey);
-    return saved ? ({ ...initialState, ...JSON.parse(saved) } as AppState) : initialState;
+    if (!saved) return initialState;
+    const parsed = { ...initialState, ...JSON.parse(saved) } as AppState;
+    return {
+      ...parsed,
+      opportunities: parsed.opportunities.map((opportunity) => ({
+        ...defaultOpportunities.find((item) => item.id === opportunity.id),
+        ...opportunity,
+      })),
+    };
   } catch {
     return initialState;
   }
@@ -569,15 +605,22 @@ function Onboarding({ state, patch, profile, patchProfile, onDone }: { state: Ap
 }
 
 function Home({ setView, balance, affordableCount }: { setView: (view: View) => void; balance: number; affordableCount: number }) {
+  const previewCards = [
+    { title: "Caribbean escape", image: travelImages.tropicalResort, meta: "Resorts and cruises" },
+    { title: "Disney-style family adventure", image: travelImages.themePark, meta: "Theme-park memories" },
+    { title: "Japan dream trip", image: travelImages.japan, meta: "Tokyo and Kyoto" },
+    { title: "Mediterranean cruise", image: travelImages.mediterranean, meta: "Europe by sea" },
+  ];
+
   return (
     <section className="page-grid">
-      <header className="page-header scenic-sky home-hero">
-        <div>
+      <header className="page-header image-hero home-hero" style={{ backgroundImage: `linear-gradient(105deg, rgba(20, 78, 91, 0.84), rgba(247, 134, 58, 0.46)), url(${travelImages.family})` }}>
+        <div className="hero-copy">
           <span className="eyebrow">Travel membership platform</span>
-          <h1>Pay for your next vacation one paycheck at a time.</h1>
+          <h1>Your next vacation starts with your next paycheck.</h1>
           <p>
-            Travel Budget helps families build a Travel Balance and discover real-feeling trip opportunities when that balance is ready.
-            It is not a bank and not a travel agency checkout. It is a membership-style way to turn future vacations into visible progress.
+            Build a Travel Balance over time, then use it when the right cruise, resort, theme park, or dream trip appears.
+            Travel Budget turns someday into a visible path toward somewhere.
           </p>
           <div className="hero-actions">
             <button className="primary light" onClick={() => setView("onboarding")}>Start travel setup</button>
@@ -590,6 +633,16 @@ function Home({ setView, balance, affordableCount }: { setView: (view: View) => 
           <small>{affordableCount} trips currently say You Can Afford This.</small>
         </div>
       </header>
+
+      <div className="destination-strip">
+        {previewCards.map((card) => (
+          <button className="destination-card" key={card.title} onClick={() => setView("opportunities")}>
+            <img src={card.image} alt="" />
+            <span>{card.meta}</span>
+            <strong>{card.title}</strong>
+          </button>
+        ))}
+      </div>
 
       <div className="value-grid">
         <div className="panel">
@@ -614,15 +667,20 @@ function Home({ setView, balance, affordableCount }: { setView: (view: View) => 
 
 function Dashboard({ state, profile, rankedTrips, affordableTrips, almostTrips, goal, setView }: { state: AppState; profile: Profile; rankedTrips: RankedOpportunity[]; affordableTrips: RankedOpportunity[]; almostTrips: RankedOpportunity[]; goal?: Goal; setView: (view: View) => void }) {
   const latestBooking = state.bookings[0];
+  const featuredTrip = rankedTrips[0];
+  const keepBuildingTrips = rankedTrips.filter((trip) => trip.status === "building").slice(0, 3);
+  const nearestTrip = rankedTrips[0]?.opportunity;
+  const nearestProgress = nearestTrip ? percent(state.balance, nearestTrip.estimatedTotalCost) : 0;
+  const savedTrips = rankedTrips.filter((trip) => state.savedTripIds.includes(trip.opportunity.id));
   return (
     <section className="page-grid">
-      <header className="page-header scenic-coast">
+      <header className="page-header image-hero" style={{ backgroundImage: `linear-gradient(105deg, rgba(17, 74, 88, 0.86), rgba(247, 134, 58, 0.42)), url(${travelImages.weekend})` }}>
         <div>
-          <span className="eyebrow">Travel membership dashboard</span>
-          <h1>Your next vacation is becoming inevitable.</h1>
-          <p>{profile.name} is matched against trips that fit your airport, timing, interests, party size, exclusions, rating, and Travel Balance.</p>
+          <span className="eyebrow">Vacation command center</span>
+          <h1>Your next adventure has already started.</h1>
+          <p>{profile.name} is matched against cruises, resorts, theme-park trips, and dream escapes that fit your Travel Balance.</p>
         </div>
-        <button className="primary light" onClick={() => setView("opportunities")}>See trip matches</button>
+        <button className="primary light" onClick={() => setView("opportunities")}>Explore trips</button>
       </header>
 
       {latestBooking && (
@@ -636,18 +694,31 @@ function Dashboard({ state, profile, rankedTrips, affordableTrips, almostTrips, 
         <div className="balance-card">
           <span className="eyebrow">Travel Balance</span>
           <strong>{money(state.balance)}</strong>
-          <small>Available to use toward eligible travel opportunities.</small>
+          <small>{nearestTrip ? `${nearestProgress}% toward ${nearestTrip.title}` : "Available to use toward eligible travel opportunities."}</small>
+          {nearestTrip && <Progress value={nearestProgress} />}
         </div>
         <Metric label="You can afford" value={String(affordableTrips.length)} detail="Balance-eligible trips" />
         <Metric label="Almost there" value={String(almostTrips.length)} detail="Within $500" />
         <Metric label="Saved trips" value={String(state.savedTripIds.length)} detail="Local demo list" />
       </div>
 
+      {featuredTrip && (
+        <div className="featured-trip">
+          <img src={imageForTone[featuredTrip.opportunity.imageTone] ?? travelImages.tropicalResort} alt="" />
+          <div>
+            <span className={`status-pill ${featuredTrip.status}`}>{featuredTrip.status === "afford" ? "You Can Afford This" : featuredTrip.status === "almost" ? `Only ${money(featuredTrip.opportunity.estimatedTotalCost - state.balance)} away` : "Keep Building Toward"}</span>
+            <h2>{featuredTrip.opportunity.title}</h2>
+            <p>{featuredTrip.opportunity.description}</p>
+            <button className="primary" onClick={() => setView("opportunities")}>View opportunity match</button>
+          </div>
+        </div>
+      )}
+
       <div className="content-grid two-one">
         <div className="panel">
-          <PanelHead eyebrow="Best matches" title="Opportunity engine" action="Explore all" onClick={() => setView("opportunities")} />
+          <PanelHead eyebrow="You Can Afford This" title="Ready when you are" action="Explore all" onClick={() => setView("opportunities")} />
           <div className="opportunity-row">
-            {rankedTrips.slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}
+            {(affordableTrips.length ? affordableTrips : rankedTrips).slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}
           </div>
         </div>
         <div className="panel">
@@ -658,13 +729,31 @@ function Dashboard({ state, profile, rankedTrips, affordableTrips, almostTrips, 
 
       <div className="content-grid two-one">
         <div className="panel">
+          <PanelHead eyebrow="Almost There" title="Trips within reach" action="Add to Travel Balance" onClick={() => setView("balance")} />
+          <div className="opportunity-row">
+            {(almostTrips.length ? almostTrips : rankedTrips.slice(1, 4)).slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}
+          </div>
+        </div>
+        <div className="panel">
+          <PanelHead eyebrow="Keep Building Toward" title="Dream trips on deck" action="Vacation Alerts" onClick={() => setView("alerts")} />
+          {keepBuildingTrips.length ? keepBuildingTrips.map((trip) => <MiniTrip key={trip.opportunity.id} trip={trip} balance={state.balance} />) : <p className="muted">Your Travel Balance is opening up the best matches already.</p>}
+        </div>
+      </div>
+
+      <div className="content-grid two-one">
+        <div className="panel">
           <PanelHead eyebrow="Travel Balance activity" title="Recent progress" action="Open simulator" onClick={() => setView("balance")} />
           <Ledger items={state.ledger.slice(0, 5)} />
         </div>
         <div className="panel">
           <PanelHead eyebrow="Travel goal" title={goal?.name ?? "Create a goal"} action="Goals" onClick={() => setView("goals")} />
-          {goal ? <><Progress value={percent(goal.currentAmount, goal.targetAmount)} /><p>{money(goal.currentAmount)} of {money(goal.targetAmount)} ready.</p></> : <p>Create a shareable Travel Goal so friends and family can cheer the trip forward.</p>}
+          {goal ? <><img className="goal-image" src={travelImages.japan} alt="" /><Progress value={percent(goal.currentAmount, goal.targetAmount)} /><p>{money(goal.currentAmount)} of {money(goal.targetAmount)} ready.</p></> : <p>Create a shareable Travel Goal so friends and family can cheer the trip forward.</p>}
         </div>
+      </div>
+
+      <div className="panel">
+        <PanelHead eyebrow="Saved trips" title="Come back to these escapes" action="Explore trips" onClick={() => setView("opportunities")} />
+        {savedTrips.length ? <div className="opportunity-row">{savedTrips.slice(0, 3).map((trip) => <TripCard key={trip.opportunity.id} trip={trip} compact />)}</div> : <EmptyState title="No saved trips yet" text="Save a resort, cruise, or dream trip so the dashboard feels like your personal travel shelf." />}
       </div>
     </section>
   );
@@ -913,26 +1002,32 @@ function ProfileForm({ title, draft, setDraft, submitLabel, onSubmit }: { title:
 
 function TripCard({ trip, compact = false, saved, shared, onSave, onShare, onBook, onReferral }: { trip: RankedOpportunity; compact?: boolean; saved?: boolean; shared?: boolean; onSave?: () => void; onShare?: () => void; onBook?: () => void; onReferral?: () => void }) {
   const { opportunity } = trip;
-  const label = trip.status === "afford" ? "You can afford this" : trip.status === "almost" ? "Almost there" : "Keep building";
+  const label = trip.status === "afford" ? "You Can Afford This" : trip.status === "almost" ? "Almost There" : "Keep Building";
+  const savings = opportunity.regularPrice - opportunity.travelBudgetPrice;
   return (
     <article className={compact ? "opportunity-card compact" : "opportunity-card"}>
-      <div className={`opportunity-image ${opportunity.imageTone}`}>
+      <div className="opportunity-image photo-card" style={{ backgroundImage: `linear-gradient(180deg, rgba(8, 43, 55, 0.12), rgba(8, 43, 55, 0.72)), url(${imageForTone[opportunity.imageTone] ?? travelImages.tropicalResort})` }}>
+        <span className="category-badge">{opportunity.category}</span>
         <span className={`afford-badge ${trip.status}`}>{label}</span>
       </div>
       <div className="opportunity-body">
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">{opportunity.category}</span>
+            <span className="eyebrow">{opportunity.destination}</span>
             <h2>{opportunity.title}</h2>
-            <p>{opportunity.destination}</p>
+            <p>{opportunity.description}</p>
           </div>
-          <strong>{money(opportunity.estimatedTotalCost)}</strong>
+          <strong>{money(opportunity.travelBudgetPrice)}</strong>
         </div>
         {!compact && (
           <>
             <InfoList items={[["Provider", opportunity.provider], ["Travel dates", opportunity.travelDates], ["Airport", opportunity.departureAirport], ["Capacity", `${opportunity.partyCapacity} travelers`], ["Rating", `${opportunity.minimumRating}+`], ["Inventory", `${opportunity.remainingInventory} remaining`], ["Expires", `${daysUntil(opportunity.expiryDate)} days`], ["Regular price", money(opportunity.regularPrice)], ["Travel Budget price", money(opportunity.travelBudgetPrice)]]} />
+            <div className="deal-strip">
+              <span>Save {money(savings)}</span>
+              <span>{trip.status === "almost" ? "Within $500 of this trip" : `${money(opportunity.estimatedTotalCost)} estimated total`}</span>
+            </div>
             <div className="included-list">{opportunity.included.map((item) => <span key={item}>{item}</span>)}</div>
-            <p className="match-reason">Matched because it {trip.reasons.join(", ")}.</p>
+            <p className="match-reason">Why this matches you: {trip.reasons.join(", ")}.</p>
             <div className="button-row">
               <button className="secondary" onClick={onSave}>{saved ? "Saved" : "Save trip"}</button>
               <button className="secondary" onClick={onShare}>{shared ? "Shared" : "Share trip"}</button>
@@ -943,6 +1038,19 @@ function TripCard({ trip, compact = false, saved, shared, onSave, onShare, onBoo
         )}
       </div>
     </article>
+  );
+}
+
+function MiniTrip({ trip, balance }: { trip: RankedOpportunity; balance: number }) {
+  const away = Math.max(0, trip.opportunity.estimatedTotalCost - balance);
+  return (
+    <div className="mini-trip">
+      <img src={imageForTone[trip.opportunity.imageTone] ?? travelImages.tropicalResort} alt="" />
+      <div>
+        <strong>{trip.opportunity.title}</strong>
+        <span>{money(away)} away from this trip</span>
+      </div>
+    </div>
   );
 }
 

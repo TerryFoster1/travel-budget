@@ -6,18 +6,19 @@
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #17211f;
-  background: #f6f4ee;
+  background: #fff6e6;
   --ink: #17211f;
-  --muted: #62706c;
-  --line: rgba(27, 44, 40, 0.12);
-  --paper: rgba(255, 255, 255, 0.88);
-  --reef: #0f766e;
-  --reef-dark: #0c4f4c;
-  --sun: #f2a541;
-  --coral: #df6b57;
-  --sky: #78b7d9;
+  --muted: #6f5f4f;
+  --line: rgba(35, 74, 86, 0.14);
+  --paper: rgba(255, 252, 245, 0.92);
+  --reef: #00a58c;
+  --reef-dark: #075e68;
+  --sun: #ffad2f;
+  --coral: #ff6f4f;
+  --sky: #169bd5;
   --plum: #6d4b76;
-  --shadow: 0 24px 70px rgba(37, 51, 48, 0.14);
+  --cream: #fff2d7;
+  --shadow: 0 24px 70px rgba(37, 51, 48, 0.16);
 }
 
 * {
@@ -29,8 +30,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 10% 0%, rgba(242, 165, 65, 0.18), transparent 32rem),
-    linear-gradient(145deg, #f8f4ec 0%, #edf4f2 46%, #f7efe8 100%);
+    radial-gradient(circle at 10% 0%, rgba(255, 173, 47, 0.24), transparent 32rem),
+    radial-gradient(circle at 88% 12%, rgba(22, 155, 213, 0.18), transparent 28rem),
+    linear-gradient(145deg, #fff7e7 0%, #e9fbf8 46%, #fff0df 100%);
 }
 
 button,
@@ -92,7 +94,7 @@ p {
   height: 100vh;
   padding: 1.25rem;
   border-right: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 247, 231, 0.86);
   backdrop-filter: blur(20px);
 }
 
@@ -152,7 +154,7 @@ p {
 .nav-list button.active,
 .nav-list button:hover {
   color: var(--reef-dark);
-  background: rgba(15, 118, 110, 0.1);
+  background: linear-gradient(135deg, rgba(0, 165, 140, 0.13), rgba(255, 173, 47, 0.16));
 }
 
 .sidebar-card,
@@ -203,6 +205,8 @@ main {
   padding: clamp(1.25rem, 4vw, 3rem);
   border-radius: 16px;
   color: white;
+  background-size: cover;
+  background-position: center;
   box-shadow: var(--shadow);
 }
 
@@ -222,6 +226,20 @@ main {
   background:
     linear-gradient(120deg, rgba(23, 33, 31, 0.78), rgba(15, 118, 110, 0.52)),
     linear-gradient(135deg, #193f3c 0%, #6fb5c8 52%, #e8bc6d 100%);
+}
+
+.image-hero {
+  isolation: isolate;
+}
+
+.image-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22), transparent 18rem),
+    linear-gradient(180deg, rgba(4, 37, 49, 0.08), rgba(4, 37, 49, 0.44));
 }
 
 .boarding-pass {
@@ -380,6 +398,12 @@ main {
   background: white;
 }
 
+.secondary.translucent {
+  border-color: rgba(255, 255, 255, 0.52);
+  color: white;
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .toggle-row button.selected {
   color: white;
   background: var(--plum);
@@ -454,7 +478,9 @@ select {
   padding: 1.15rem;
   border-radius: 8px;
   color: white;
-  background: linear-gradient(135deg, var(--reef-dark), var(--reef));
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.18), transparent 10rem),
+    linear-gradient(135deg, var(--reef-dark), var(--reef));
   box-shadow: var(--shadow);
 }
 
@@ -476,6 +502,41 @@ select {
   margin-top: 1rem;
 }
 
+.balance-card .progress-track {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.featured-trip {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.05fr);
+  gap: 1.25rem;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 18px;
+  color: white;
+  background: linear-gradient(135deg, #064e5c, #0d8c9d);
+  box-shadow: var(--shadow);
+}
+
+.featured-trip img {
+  min-height: 330px;
+}
+
+.featured-trip > div {
+  display: grid;
+  align-content: center;
+  padding: clamp(1.25rem, 4vw, 2.2rem);
+}
+
+.featured-trip h2 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+
+.featured-trip p {
+  color: rgba(255, 255, 255, 0.84);
+}
+
 .content-grid {
   display: grid;
   gap: 1rem;
@@ -483,6 +544,10 @@ select {
 
 .home-hero {
   min-height: 460px;
+}
+
+.hero-copy {
+  max-width: 780px;
 }
 
 .hero-actions {
@@ -496,6 +561,69 @@ select {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
+}
+
+.destination-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.destination-card {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 18px;
+  padding: 1rem;
+  color: white;
+  background: var(--reef-dark);
+  text-align: left;
+  box-shadow: var(--shadow);
+}
+
+.destination-card img,
+.featured-trip img,
+.goal-image,
+.mini-trip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.destination-card img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  filter: saturate(1.12);
+}
+
+.destination-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, transparent 25%, rgba(5, 45, 58, 0.78));
+}
+
+.destination-card span,
+.destination-card strong {
+  position: relative;
+  z-index: 2;
+  display: block;
+}
+
+.destination-card span {
+  margin-top: 8.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.destination-card strong {
+  margin-top: 0.3rem;
+  font-size: 1.35rem;
 }
 
 .two-one {
@@ -602,6 +730,13 @@ dd {
 
 .goals-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.goal-image {
+  display: block;
+  height: 170px;
+  margin-bottom: 1rem;
+  border-radius: 12px;
 }
 
 .contribution-box {
@@ -827,6 +962,7 @@ code {
 
 .opportunity-card {
   overflow: hidden;
+  background: #fffdf8;
 }
 
 .opportunity-card.compact .details-grid,
@@ -836,8 +972,14 @@ code {
 
 .opportunity-image {
   position: relative;
-  min-height: 180px;
+  min-height: 230px;
   background: var(--sky);
+  background-size: cover;
+  background-position: center;
+}
+
+.opportunity-card.compact .opportunity-image {
+  min-height: 170px;
 }
 
 .opportunity-image.disney { background: linear-gradient(135deg, #6d4b76, #78b7d9 48%, #f2a541); }
@@ -848,14 +990,22 @@ code {
 .opportunity-image.caribbean { background: linear-gradient(135deg, #0f766e, #64c8d1 48%, #f8d98b); }
 
 .opportunity-image::after {
-  content: "";
+  content: none;
+}
+
+.category-badge {
   position: absolute;
-  inset: 18% 10% auto auto;
-  width: 42%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.26);
-  box-shadow: -80px 48px 0 rgba(255, 255, 255, 0.11);
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  min-height: 30px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  color: white;
+  background: rgba(7, 94, 104, 0.82);
+  backdrop-filter: blur(12px);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .afford-badge,
@@ -913,6 +1063,48 @@ code {
 
 .opportunity-body {
   padding: 1rem;
+}
+
+.opportunity-body .panel-heading strong {
+  color: var(--coral);
+  font-size: 1.45rem;
+}
+
+.deal-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.deal-strip span {
+  padding: 0.5rem 0.65rem;
+  border-radius: 999px;
+  color: #754111;
+  background: rgba(255, 173, 47, 0.18);
+  font-weight: 900;
+  font-size: 0.84rem;
+}
+
+.mini-trip {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.mini-trip img {
+  aspect-ratio: 1.2;
+  border-radius: 10px;
+}
+
+.mini-trip span {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--coral);
+  font-weight: 900;
 }
 
 .tag-row span {
@@ -987,8 +1179,13 @@ code {
   .choice-grid,
   .card-grid,
   .opportunity-grid,
-  .value-grid {
+  .value-grid,
+  .destination-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .featured-trip {
+    grid-template-columns: 1fr;
   }
 
   .two-one,
@@ -1032,6 +1229,7 @@ code {
   .card-grid,
   .opportunity-grid,
   .value-grid,
+  .destination-strip,
   .summary-grid,
   .stats-grid,
   .two-one,
@@ -1051,7 +1249,16 @@ code {
   .alert-card,
   .activity-item,
   .profile-line,
-  .alert-mini {
+  .alert-mini,
+  .celebration {
     flex-direction: column;
+  }
+
+  .destination-card {
+    min-height: 190px;
+  }
+
+  .featured-trip img {
+    min-height: 230px;
   }
 }
